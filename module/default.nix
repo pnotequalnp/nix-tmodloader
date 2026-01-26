@@ -4,9 +4,8 @@ let
   cfg = config.services.tmodloader;
 
   worldSizeMap = { small = 1; medium = 2; large = 3; };
-  valFlag = name: val: lib.optionalString (val != null) "-${name} \"${lib.escape ["\\" "\""] (toString val)}\"";
+  valFlag = name: val: lib.optionalString (val != null) "-${name} ${lib.escape ["\\" "\'"] (toString val)}";
   boolFlag = name: val: lib.optionalString val "-${name}";
-  
 in
 {
   options = {
