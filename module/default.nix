@@ -68,6 +68,15 @@ in
               default = null;
               description = "Sets the server password. Leave `null` for no password";
             };
+
+            passwordFile = mkOption {
+              type = types.nullOr types.path;
+              default = null;
+              example = "/path/to/password/file";
+              description = ''
+                Path to file containing server password. Cannot be used with `services.tmodloader.servers.<name>.password`
+              '';
+            };
             
             world = mkOption {
               type = types.nullOr types.path;
@@ -164,7 +173,10 @@ in
           assertion = all(x: x == 1) counts;
           message = "Two or more servers have conflicting ports";
         }
-      ];
+      ] ++ (lib.mapAttrsToList (name: server: {
+        assertion = server.password == null || server.passwordFile == null;
+        message = "In `services.tmodloader.servers.${name}`, you cannot define both `password` and `passwordFile`.";
+      }) cfg.servers);
 
       environment.systemPackages = mkIf cfg.makeAttachScripts (
         mapAttrsToList (name: conf: pkgs.writeShellApplication {
@@ -304,15 +316,26 @@ in
           wantedBy = mkIf conf.autoStart [ "multi-user.target" ];
           after = [ "network.target" ];
 
+          script = ''
+            CMD_FLAGS='${concatStringsSep " " flags}'
+
+            ${lib.optionalString (conf.passwordFile != null) ''
+              PASS=$(< "$CREDENTIALS_DIRECTORY/server-password")
+              CMD_FLAGS="$CMD_FLAGS -password $PASS"
+            ''}
+
+            exec ${tmuxCmd} new -d ${getExe conf.package} $CMD_FLAGS
+          '';
+
           serviceConfig = {
             User = "terraria";
             Group = "terraria";
             Type = "forking";
             GuessMainPID = true;
             UMask = 7;
+            LoadCredential = lib.optional (conf.passwordFile != null) "server-password:${conf.passwordFile}";
 
             ExecStartPre = "${startPreScript}";
-            ExecStart = "${tmuxCmd} new -d ${getExe conf.package} ${concatStringsSep " " flags}";
             ExecStop = "${getExe stopScript} $MAINPID";
           };
 
