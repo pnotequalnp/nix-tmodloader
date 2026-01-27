@@ -151,6 +151,12 @@ in
               description = "List of workshop mod ids to install";
             };
             
+
+            saveDirectory = mkOption {
+              type = types.nullOr types.path;
+              defaultText = "\${cfg.dataDir}/\${name}";
+              description = "Directory where world is saved.";
+            };
           };
         }));
       };
@@ -199,12 +205,13 @@ in
 
       systemd.services = mapAttrs' (name: conf: 
       let
+        saveDir = if conf.saveDirectory != null then conf.saveDirectory else "${cfg.dataDir}/${name}";
         flags = [
           "-nosteam"
 
           # THESE ARE NECESSARY in order to locate workshop mods
           # this is definitely not backwards compatible
-          "-tmlsavedirectory ${cfg.dataDir}/${name}"
+          "-tmlsavedirectory ${saveDir}"
           "-steamworkshopfolder ${cfg.dataDir}/${name}/steamapps/workshop"
 
           (valFlag "port" conf.port)
