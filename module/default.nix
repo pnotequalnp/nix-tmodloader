@@ -234,7 +234,7 @@ in
           (valFlag "players" conf.players)
           (valFlag "password" conf.password)
           (valFlag "world" conf.world)
-          (valFlag "autocreate" (builtins.getAttr conf.autocreate worldSizeMap))
+          # (valFlag "autocreate" (builtins.getAttr conf.autocreate worldSizeMap))
           (valFlag "worldname" conf.worldname)
           (valFlag "difficulty" (builtins.getAttr conf.difficulty difficultyMap))
           (valFlag "banlist" conf.banlist)
