@@ -221,7 +221,7 @@ in
           # THESE ARE NECESSARY in order to locate workshop mods
           # this is definitely not backwards compatible
           "-tmlsavedirectory ${saveDir}"
-          "-steamworkshopfolder ${cfg.dataDir}/${name}/steamapps/workshop"
+          "-steamworkshopfolder ${saveDir}/steamapps/workshop"
 
           (valFlag "port" conf.port)
           (valFlag "players" conf.players)
@@ -252,11 +252,11 @@ in
             echo UPDATING MODS
             # bash ${conf.package}/DedicatedServerUtils/manage-tModLoaderServer.sh \
               # install-mods \
-              # -f ${escapeShellArg cfg.dataDir}/${name} \
+              # -f ${escapeShellArg saveDir} \
               # --steamcmdpath ${pkgs.steamcmd}/bin/steamcmd
 
             steamcmd +force_install_dir \
-              ${escapeShellArg cfg.dataDir}/${name} \
+              ${escapeShellArg saveDir} \
               +login anonymous \
               ${concatStringsSep " " (map (x: "+workshop_download_item 1281930 ${toString x}") conf.install)} \
               +quit
@@ -268,11 +268,11 @@ in
             # finally we write to Mods/enabled.json. If there are no mods, enabled.json will
             # be empty which is probably fine ??
 
-            find ${escapeShellArg cfg.dataDir}/${name}/steamapps -regex ".*tmod" \
+            find ${escapeShellArg saveDir}/steamapps -regex ".*tmod" \
               | sed -E 's/.*\/(\w+)\.tmod/"\1",/' \
               | tr -d '\n' \
               | sed -E 's/(.*)./[\1]\n/' \
-              > ${escapeShellArg cfg.dataDir}/${name}/Mods/enabled.json
+              > ${escapeShellArg saveDir}/Mods/enabled.json
 
             
           '';
@@ -316,8 +316,8 @@ in
           chmod 777 /tmp/server.log
 
           # make install.txt
-          mkdir -p ${escapeShellArg cfg.dataDir}/${name}/Mods
-          echo "${concatStringsSep "\\n" (map toString conf.install)}" > ${escapeShellArg cfg.dataDir}/${name}/Mods/install.txt
+          mkdir -p ${escapeShellArg saveDir}/Mods
+          echo "${concatStringsSep "\\n" (map toString conf.install)}" > ${escapeShellArg saveDir}/Mods/install.txt
 
           ${getExe updateWorkshop}
         '';
