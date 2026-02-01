@@ -4,6 +4,7 @@ let
   cfg = config.services.tmodloader;
 
   worldSizeMap = { small = 1; medium = 2; large = 3; };
+  difficultyMap = { classic = 0; expert = 1; master = 2; journey = 3; };
   valFlag = name: val: lib.optionalString (val != null) "-${name} ${lib.escape ["\\" "\'"] (toString val)}";
   boolFlag = name: val: lib.optionalString val "-${name}";
 in
@@ -94,6 +95,12 @@ in
                 The name of the world to create if no world is specified, or the specified world
                 does not exist.
               '';
+            };
+
+            difficulty = mkOption {
+              type = types.enum [ "classic" "expert" "master" "journey" ];
+              default = "classic";
+              description = "Difficulty of autocreated world.";
             };
 
             autocreate = mkOption {
@@ -229,6 +236,7 @@ in
           (valFlag "world" conf.world)
           (valFlag "autocreate" (builtins.getAttr conf.autocreate worldSizeMap))
           (valFlag "worldname" conf.worldname)
+          (valFlag "difficulty" (builtins.getAttr conf.difficulty difficultyMap))
           (valFlag "banlist" conf.banlist)
           (boolFlag "secure" conf.secure)
           (boolFlag "noupnp" conf.noupnp)
