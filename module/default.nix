@@ -87,6 +87,15 @@ in
               '';
             };
 
+            worldname = mkOption {
+              type = types.nullOr types.str;
+              default = null;
+              description = ''
+                The name of the world to create if no world is specified, or the specified world
+                does not exist.
+              '';
+            };
+
             autocreate = mkOption {
               type = types.enum [ "small" "medium" "large" ];
               default = "medium";
@@ -219,6 +228,7 @@ in
           (valFlag "password" conf.password)
           (valFlag "world" conf.world)
           (valFlag "autocreate" (builtins.getAttr conf.autocreate worldSizeMap))
+          (valFlag "worldname" conf.worldname)
           (valFlag "banlist" conf.banlist)
           (boolFlag "secure" conf.secure)
           (boolFlag "noupnp" conf.noupnp)
